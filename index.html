@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Simples - Projeto 2</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #input-number {
+            border: 0.1rem solid #000000;
+            height: 4.5rem;
+            width: 11rem;
+            font-size: 2rem;
+            padding: 0.5rem;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-family: sans-serif;
+        }
+
+        #row1 {
+            display: flex;
+            flex-direction: row;
+        }
+        #row2 {
+            display: flex;
+            flex-direction: row;
+        }
+        #row3 {
+            display: flex;
+            flex-direction: row;
+        }
+        #row4 {
+            display: flex;
+            flex-direction: row;
+        }
+        #row5 {
+            display: flex;
+            flex-direction: row;
+        }
+
+        button {
+            border-radius: 0.3rem;
+            width: 5.5rem;
+            height: 4.5rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        button:hover {
+            background-color: #b4b2b2;
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="row1">
+            <button id="clear">C</button><div id="input-number"></div><button id="backspace">⌫</button>
+        </div>
+
+        <div id="row2">
+            <button id="seven" data-valor="7">7</button><button id="eight" data-valor="8">8</button><button id="nine" data-valor="9">9</button><button id="divide" data-op="/" data-simbolo="÷">÷</button>
+        </div>
+
+        <div id="row3">
+            <button id="four" data-valor="4">4</button><button id="five" data-valor="5">5</button><button id="six" data-valor="6">6</button> <button id="times" data-op="*" data-simbolo="×">×</button>
+        </div>
+
+        <div id="row4">
+            <button id="one" data-valor="1">1</button><button id="two" data-valor="2">2</button><button id="three" data-valor="3">3</button><button id="plus" data-op="+" data-simbolo="+">+</button>
+        </div>
+
+        <div id="row5">
+            <button id="comma" data-virgula=".">,</button><button id="zero" data-valor="0">0</button><button id="equals">=</button><button id="minus" data-op="-" data-simbolo="-">-</button>
+        </div>
+    </div>
+
+    <script>
+        const botoesNumericos = document.querySelectorAll('button[data-valor]');
+        const botoesOperadores = document.querySelectorAll('button[data-op]');
+        const inputNumber = document.getElementById('input-number');
+        const equals = document.getElementById('equals');
+        const clear = document.getElementById('clear');
+        const backspace = document.getElementById('backspace');
+        const comma = document.getElementById('comma');
+
+        let visorAtual = '';
+        let num1 = '';
+        let num2 = '';
+        let operador = ''
+        let esperandoNum2 = false;
+
+        function atualizarVisor() {
+            inputNumber.innerText = visorAtual;
+        }
+
+        function calcular(num1, operador, num2) {
+            let resultado;
+            const number1 = parseFloat(num1.replace(',', '.'));
+            const number2 = parseFloat(num2.replace(',', '.'));
+
+
+            switch(operador) {
+                case '+':
+                    resultado = number1 + number2;
+                    break;
+                case '-':
+                    resultado = number1 - number2;
+                    break;
+                case '*':
+                    resultado = number1 * number2;
+                    break;
+                case '/': 
+                    if (number2 === 0) {
+                        alert('Erro: A divisão por 0 não é permitida!');
+                    } else {
+                        resultado = number1 / number2;
+                    }
+                    break;
+                default:
+                    resultado = 0;
+                    break;
+            }
+            return resultado;
+        }
+
+        // Números
+        for (i = 0; i < botoesNumericos.length; i++) {
+            botoesNumericos[i].addEventListener('click', function() {
+                if (visorAtual.length > 8) return;
+                const valor = this.getAttribute('data-valor');
+                visorAtual += valor;
+                console.log(visorAtual);
+                atualizarVisor();
+            })
+        }
+
+        // Operadores 
+        for (i = 0; i < botoesOperadores.length; i++) {
+            botoesOperadores[i].addEventListener('click', function() {
+                if (!esperandoNum2) {
+                    num1 = visorAtual;
+                    operador = this.getAttribute('data-op');
+                    let simboloDoVisor = this.getAttribute('data-simbolo');
+                    visorAtual += simboloDoVisor;
+                    esperandoNum2 = true;
+                    atualizarVisor();
+                }
+            });
+        }
+
+        equals.addEventListener('click', function() {
+            if (esperandoNum2) {
+                let simboloDoVisor = '';
+
+                switch(operador) {
+                    case '/':
+                        simboloDoVisor = '÷';
+                        break;
+                    case '*':
+                        simboloDoVisor = '×';
+                        break;
+                    case '+':
+                        simboloDoVisor = '+';
+                        break;
+                    case '-':
+                        simboloDoVisor = '-';
+                        break;
+                }
+
+                let indiceOperador = visorAtual.indexOf(simboloDoVisor);
+                num2 = visorAtual.substring(indiceOperador + 1);
+                const resultado = calcular(num1, operador, num2);
+
+                visorAtual = resultado.toPrecision(5).replace('.', ',').replace(/,?0+$/, '');
+                atualizarVisor();
+            }
+        })
+
+        clear.addEventListener('click', function() {
+            visorAtual = '';
+            num1 = '';
+            num2 = '';
+            operador = '';
+            esperandoNum2 = false;
+            atualizarVisor();
+        });
+
+        backspace.addEventListener('click', function() {
+            if (visorAtual.length > 0) {
+                visorAtual = visorAtual.slice(0, -1);
+                atualizarVisor();
+            }
+
+            const simbolos = ['÷', '×', '+', '-'];
+            let simboloEncontrado = simbolos.find(s => visorAtual.includes(s));
+
+            if(simboloEncontrado) {
+                let partes = visorAtual.split(simboloEncontrado);
+                num1 = parte[0];
+                num2 = parte[1] || '';
+                esperandoNum2 = false;
+
+                switch(simboloEncontrado) {
+                    case '÷': 
+                        operador = '/';
+                        break;
+                    case '×': 
+                        operador = '*';
+                        break;
+                    default:
+                        operador = simboloEncontrado;
+                }
+
+            } else {
+                num1 = visorAtual;
+                operador = '';
+                num2 = '';
+                esperandoNum2 = false;
+            }
+            
+        });
+
+        comma.addEventListener('click', function() {
+            const virgula = document.querySelector('button[data-virgula');
+            const simbolos = ['÷', '×', '+', '-'];
+            let simboloEncontrado = simbolos.find(s => visorAtual.includes(s));
+
+            if (simboloEncontrado) {
+                let partes = visorAtual.split(simboloEncontrado);
+                let segundaParte = partes[1] || '';
+                
+                if(!segundaParte.includes(',')) {
+                    if (segundaParte === '') {
+                        visorAtual += '0,';
+                    } else {
+                        visorAtual += ',';
+                    }
+                    atualizarVisor();
+                }
+            } else {
+                if (!visorAtual.includes(',')) {
+                    if (visorAtual === '') {
+                        visorAtual = '0';
+                    } else {
+                        visorAtual += ',';
+                    }
+                    atualizarVisor();
+                }
+            }
+        })
+
+
+        
+    </script>
+</body>
+</html>
